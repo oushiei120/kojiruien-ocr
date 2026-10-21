@@ -1,205 +1,84 @@
 # 古事類苑 OCR（v5b モデル）実行手順
 
-国際日本文化研究センター（日文研）が IIIF で公開している『古事類苑』の画像を自動でダウンロードし、OCR を行って、**山田形式**（識別タグ付きテキスト）に変換するためのプログラムです。クラウド GPU サービス **RunPod** 上で、ノートブックを 1 回実行するだけで処理が完了します。
+日文研 IIIF の『古事類苑』画像を OCR し、**山田形式**（識別タグ付きテキスト）に変換します。RunPod（クラウド GPU）でノートブックを実行するだけです。
 
-- 対照ビューア（v4 / v5b の比較、山田タグの色分け表示）：https://oushiei120.github.io/kojiruien-ocr-viewer/
-
----
-
-## 0. 必要なもの・時間・費用
-
-| 項目 | 内容 |
-|---|---|
-| 必要なもの | RunPod のアカウント（クレジットカードで事前チャージ、10 ドル程度から） |
-| 時間 | 1 冊（約 1,400 頁）あたり **約 1 時間**（画像のダウンロード 20〜30 分＋OCR 20〜30 分） |
-| 費用 | RTX 4090 で 1 時間 約 0.9 ドル。**作業後に Pod を削除すれば、それ以上は課金されません** |
-| パソコン側 | ブラウザだけで操作できます（ソフトのインストールは不要） |
+- 目安：1 冊 約 1 時間、約 1 ドル（RTX 4090）
+- 対照ビューア：https://oushiei120.github.io/kojiruien-ocr-viewer/
 
 ---
 
-## 1. RunPod の準備（初回のみ）
+## 1. テンプレートを作る（初回のみ）
 
-### 1-1. アカウント作成
+https://www.runpod.io でアカウントを作り、**Billing** でクレジット（10 ドル程度）を追加します。
+**Templates → New Template** で次のように入力して保存します。
 
-1. https://www.runpod.io でアカウントを作成します。
-2. 画面左の **Billing** からクレジットを追加します（10 ドル程度で十分です）。
-
-### 1-2. テンプレートの作成
-
-実行環境の設定を「テンプレート」として保存しておきます。1 回作れば次回からはそのまま使えます。
-
-1. 画面左の **Templates** → **New Template** を押します。
-2. 次のように入力します。
-
-| 項目 | 入力する値 |
+| 項目 | 値 |
 |---|---|
-| Template name | `kojiruien`（任意） |
-| Template type | **Pod** |
-| Compute type | **NVIDIA GPU** |
 | Container image | `runpod/pytorch:2.1.1-py3.10-cuda12.1.1-devel-ubuntu22.04` |
-| Container disk | `50` GB |
-| Persistent storage（Volume disk） | `50` GB、mount path は `/workspace` |
-| HTTP Ports | Port label `JupyterLab`、Port number `8888` |
-| Environment variables | Key `JUPYTER_PASSWORD`、Value **任意のパスワード**（後で Jupyter に入るときに使います） |
+| Container disk / Volume disk | 50 GB / 50 GB |
+| HTTP Port | `8888` |
+| Environment variables | `JUPYTER_PASSWORD` ＝ 任意のパスワード |
 
-3. **Save Template** を押します。
+## 2. Pod を起動する
 
-> ⚠️ `JUPYTER_PASSWORD` を設定しないと、Jupyter が起動しません。
->
-> ⚠️ Container image は必ず上の文字列のとおりにしてください（PyTorch 2.1 / CUDA 12.1 の環境が必要です）。
+1. **Pods → Deploy** で GPU を選ぶ：**RTX 4090 または 3090**（50 シリーズは不可）
+2. **Change Template** で 1 のテンプレートを選び、**Deploy On-Demand**
+3. 1〜2 分後、**Connect → JupyterLab** を開き、パスワードを入力
 
----
+## 3. 実行する
 
-## 2. Pod を起動する（毎回）
-
-1. 画面左の **Pods** → **Deploy** を押します。
-2. GPU を選びます：**RTX 4090** または **RTX 3090**（RTX A5000・A6000・L40S なども可）。
-   - ❌ **RTX 5090 / 5080 などの 50 シリーズは使えません**（環境が対応していません）。
-   - 「Instance not available」と出たら、別の GPU を選んでください。
-3. GPU count は **1** のままにします。
-4. **Change Template** で、1-2 で作った `kojiruien` を選びます。
-5. **Deploy On-Demand** を押します。
-6. 1〜2 分待ち、Pod の **Connect** → **JupyterLab（8888）** を押し、1-2 で決めたパスワードを入力します。
-
----
-
-## 3. ノートブックを取得する
-
-1. JupyterLab のメニュー **File → New → Terminal** でターミナルを開きます。
-2. 次の 1 行を貼り付けて Enter を押します。
+1. JupyterLab で **File → New → Terminal** を開き、次の 1 行を貼り付けて Enter：
 
 ```bash
-cd /workspace && curl -L -o kojiruien_ocr_runpod.ipynb https://raw.githubusercontent.com/oushiei120/kojiruien-ocr/main/kojiruien_ocr_runpod.ipynb && echo OK
+cd /workspace && curl -L -o kojiruien_ocr_runpod.ipynb https://raw.githubusercontent.com/oushiei120/kojiruien-ocr/main/kojiruien_ocr_runpod.ipynb
 ```
 
-3. 左側のファイル一覧（見えないときは更新ボタン）に `kojiruien_ocr_runpod.ipynb` が現れるので、ダブルクリックで開きます。
-
----
-
-## 4. 実行する
-
-1. ノートブックの **「設定」のセル**で、処理する冊を指定します（冊名は「6. 冊名の一覧」を参照）。
+2. 左のファイル一覧から `kojiruien_ocr_runpod.ipynb` を開く
+3. 「設定」のセルで冊名を指定する（冊名は下の一覧を参照）
 
 ```python
-VOLUMES = ['bung_2']             # 1 冊の場合
-VOLUMES = ['bung_2', 'bung_3']   # 複数冊の場合
-AUTO_STOP_HOURS = 6              # 冊数 × 1.5 時間くらいに
+VOLUMES = ['bung_2', 'bung_3']
 ```
 
-2. メニュー **Run → Run All Cells** を押します。**カーネルの再起動は不要です。**
-3. あとは待つだけです。各セルの下に進捗が表示されます。
+4. **Run → Run All Cells** を押して待つ
 
-| セル | 内容 | 時間（1 冊） |
-|---|---|---|
-| 設定・自動停止 | 設定の確認、指定時間後に Pod を自動停止する保険 | 数秒 |
-| 環境構築 | 必要なソフトとモデルのダウンロード | 5〜10 分（初回） |
-| 画像のダウンロード | 日文研 IIIF から全頁の画像を取得 | 20〜30 分 |
-| OCR | v5b モデルで OCR（30 秒ごとに「○○ / ○○ 頁」と表示） | 20〜30 分 |
-| 変換 | 山田形式のテキストに変換 | 1 分 |
-| まとめ | `results.zip` を作成 | 数秒 |
+警告が出ても、**❌** が出なければ問題ありません。❌ が出たら、そのメッセージを開発者に送ってください。
 
-- 途中で黄色や赤の警告（`UserWarning`、`pip` の依存関係の注意など）が出ても、**「❌」が出ていなければ問題ありません**。
-- **「❌」が表示されて止まった場合**は、そのセルの最後の部分をコピーして開発者に送ってください。
+## 4. 結果を受け取り、Pod を削除する
 
-### ブラウザを閉じても処理を続けたい場合（任意）
+1. 最後のセルに **✅ 完了** と出たら、`results.zip` を右クリック → **Download**
+2. **RunPod で Pod を Terminate する**（削除しないと課金が続きます）
 
-Run All の代わりに、ターミナルで次の 1 行を実行すると、ブラウザを閉じても処理が続きます（事前に「設定」セルを編集し、保存しておいてください）。
+`results.zip` の中身：
 
-```bash
-cd /workspace && pip install -q nbconvert && nohup jupyter nbconvert --to notebook --execute --ExecutePreprocessor.timeout=-1 kojiruien_ocr_runpod.ipynb --output done.ipynb > run.log 2>&1 &
-```
-
-進捗の確認（何度でも実行できます）：
-
-```bash
-cd /workspace; for d in run/*/; do v=$(basename $d); echo "$v: 画像 $(ls $d/img 2>/dev/null | wc -l) 枚 | OCR $(cat $d/work/ocr_p*.log 2>/dev/null | grep -c 'END PAGE INFERENCE') 頁 | 変換 $( [ -f $d/${v}_v5b.txt ] && echo 済 || echo 未)"; done; [ -f results.zip ] && echo "✅ 完了：results.zip をダウンロードしてください"
-```
+- `<冊名>_v5b.txt`：山田形式のテキスト（`P n` は画像の番号）
+- `<冊名>_v5b.sorted.xml`：OCR 結果（行の座標つき）
 
 ---
 
-## 5. 結果をダウンロードし、Pod を削除する
+## 冊名の一覧
 
-1. 最後のセルに **「✅ 完了」** と表示されたら、左のファイル一覧の `results.zip` を右クリック → **Download**。
-2. **RunPod の画面に戻り、Pod の「Terminate」を押して削除します。** 削除しないと課金が続きます。
-   - 設定した `AUTO_STOP_HOURS` が過ぎると自動で「停止」されますが、停止中もストレージ料金が少しかかるので、必ず削除してください。
+| 部 | 冊名 | 部 | 冊名 | 部 | 冊名 |
+|---|---|---|---|---|---|
+| 天部 | tenb_1 | 歳時部 | saij_1 | 地部 | chib_1〜3 |
+| 神祇部 | jing_1〜4 | 帝王部 | teio_1 | 官位部 | kani_1〜3 |
+| 封禄部 | horo_1 | 政治部 | seij_1〜4 | 法律部 | hori_1〜3 |
+| 泉貨部 | senk_1 | 称量部 | syor_1 | 外交部 | gaik_1 |
+| 兵事部 | heij_1 | 武技部 | bugi_1 | 方技部 | hogi_1 |
+| 宗教部 | syuk_1〜4 | 文学部 | bung_1〜3 | 礼式部 | reis_1〜2 |
+| 楽舞部 | gaku_1〜2 | 人部 | jinb_1〜2 | 姓名部 | seim_1 |
+| 産業部 | sang_1〜2 | 服飾部 | huku_1 | 飲食部 | insi_1 |
+| 居処部 | kyos_1 | 器用部 | kiyo_1〜2 | 遊戯部 | yugi_1 |
+| 動物部 | dobu_1 | 植物部 | syok_1〜2 | 金石部 | kins_1 |
 
-### results.zip の中身
-
-| ファイル | 内容 |
-|---|---|
-| `<冊名>_v5b.txt` | **山田形式の識別タグ付きテキスト**（A/B/C/G/V/N/H/W/M/X、`P n`、`<wari>`） |
-| `<冊名>_v5b.sorted.xml` | OCR の結果（行ごとの枠の座標・種別・文字）。TEI や IIIF 表示に利用できます |
-
-> 📝 `P n` の n は**画像の番号**です。冊の最初や途中に目録・図版などの頁がある場合、刊本の頁番号とずれることがあります。
->
-> 📝 OCR と自動変換の結果で、人手による校正はしていません。ルビは親字に付けていません。返り点は出力されません。
-
----
-
-## 6. 冊名の一覧（日文研 IIIF、全 53 冊）
-
-`VOLUMES` には左の「冊名」を書きます。画像数は目録・図版を含む数で、1,000 枚あたり OCR まで約 40 分が目安です。
-**太字**は、既存の識別タグ付きテキスト（[yamadashoji18/kojiruien](https://github.com/yamadashoji18/kojiruien)、20 冊）に含まれていない部です。
-
-| 冊名 | 部 | 画像数 | | 冊名 | 部 | 画像数 |
-|---|---|---|---|---|---|---|
-| saij_1 | 歳時部 | 1528 | | **syuk_1** | **宗教部1** | 1170 |
-| tenb_1 | 天部 | 346 | | **syuk_2** | **宗教部2** | 1272 |
-| chib_1 | 地部1 | 1410 | | **syuk_3** | **宗教部3** | 1416 |
-| chib_2 | 地部2 | 1422 | | **syuk_4** | **宗教部4** | 1380 |
-| chib_3 | 地部3 | 1448 | | **bung_1** | **文學部1** | 1466 |
-| **jing_1** | **神祇部1** | 1728 | | **bung_2** | **文學部2** | 1498 |
-| **jing_2** | **神祇部2** | 1932 | | **bung_3** | **文學部3** | 1542 |
-| **jing_3** | **神祇部3** | 1696 | | **reis_1** | **禮式部1** | 1540 |
-| **jing_4** | **神祇部4** | 1752 | | **reis_2** | **禮式部2** | 1604 |
-| teio_1 | 帝王部 | 1762 | | **gaku_1** | **樂舞部1** | 1048 |
-| **kani_1** | **官位部1** | 1588 | | **gaku_2** | **樂舞部2** | 1242 |
-| **kani_2** | **官位部2** | 1482 | | jinb_1 | 人部1 | 1354 |
-| **kani_3** | **官位部3** | 1954 | | jinb_2 | 人部2 | 1062 |
-| horo_1 | 封祿部 | 546 | | seim_1 | 姓名部 | 860 |
-| **seij_1** | **政治部1** | 1570 | | **sang_1** | **産業部1** | 934 |
-| **seij_2** | **政治部2** | 1262 | | **sang_2** | **産業部2** | 872 |
-| **seij_3** | **政治部3** | 1416 | | **huku_1** | **服飾部** | 1568 |
-| **seij_4** | **政治部4** | 1448 | | insi_1 | 飮食部 | 1092 |
-| **hori_1** | **法律部1** | 1272 | | **kyos_1** | **居處部** | 1294 |
-| **hori_2** | **法律部2** | 1058 | | kiyo_1 | 器用部1 | 958 |
-| **hori_3** | **法律部3** | 1060 | | kiyo_2 | 器用部2 | 1068 |
-| **senk_1** | **泉貨部** | 475 | | yugi_1 | 遊戯部 | 1314 |
-| syor_1 | 稱量部 | 150 | | dobu_1 | 動物部 | 1736 |
-| **gaik_1** | **外交部** | 1894 | | syok_1 | 植物部1 | 1234 |
-| **heij_1** | **兵事部** | 2272 | | syok_2 | 植物部2 | 962 |
-| bugi_1 | 武技部 | 1344 | | **kins_1** | **金石部** | 394 |
-| hogi_1 | 方技部 | 1556 | |  |  |  |
-
----
-
-## 7. うまくいかないとき
+## うまくいかないとき
 
 | 症状 | 対処 |
 |---|---|
-| GPU が「Instance not available」 | 別の GPU（RTX 3090 / 4090 / A5000 など）を選ぶ。50 シリーズは不可 |
-| Connect に JupyterLab が出ない | テンプレートの `JUPYTER_PASSWORD` を確認し、Pod を作り直す |
-| 環境構築のセルで「Google Drive」関連のエラー | NDLOCR 一式（約 3.6 GB）を Google Drive から取得しています。アクセスが集中すると一時的に制限されることがあるので、しばらく待ってからそのセルだけ再実行する |
-| 「❌ OCR が失敗しました」 | 表示されたメッセージを開発者に送る。`CUDA out of memory` の場合は設定の `PARALLEL` を 2 にして再実行 |
-| ディスクが足りない | テンプレートの Volume disk を 50 GB 以上にする（複数冊を一度に処理する場合は 80 GB 程度） |
-| 途中で止めたい | ノートブックのメニュー **Kernel → Interrupt**。再実行するとダウンロード済みの画像は再取得されない（OCR はその冊の最初からやり直す） |
+| GPU が「Instance not available」 | 別の GPU を選ぶ |
+| Google Drive 関連のエラー | 混雑による一時的な制限。しばらく待ってそのセルを再実行 |
+| `CUDA out of memory` | 設定の `PARALLEL` を 2 にして再実行 |
 
 ---
 
-## 8. モデルについて
-
-| モデル | 学習データ | 割注 F 値 | 編目 F 値 | 文字誤り率 |
-|---|---|---|---|---|
-| NDLOCR 公式 | － | 81.6 | 41.7 | 9.7% |
-| v4 | 人手で修正した文学部一の 100 頁 | 88.9 | 59.1 | 6.3% |
-| **v5b** | v4 ＋ 既存の識別タグ付きテキストから自動作成した 1,038 頁（人手作業なし） | **92.7** | **68.8** | 6.3% |
-
-評価は、どのモデルも学習に使っていない人部一 P1–P100 で、既存の識別タグ付きテキストを正解として行いました。
-
----
-
-## 謝辞・ライセンス
-
-- OCR エンジン：国立国会図書館 [NDLOCR](https://github.com/ndl-lab/ndlocr_cli)（CC BY 4.0）。v4 / v5b はそのレイアウト認識モデルを微調整したものです。
-- 正解データ・書名辞書：山田奨治「[識別タグ付き古事類苑データ](https://github.com/yamadashoji18/kojiruien)」（CC0）
-- 画像：国際日本文化研究センター 古事類苑データベース（IIIF）。画像は本リポジトリに含まれず、実行時に日文研のサーバーから取得します。
+OCR エンジン：国立国会図書館 [NDLOCR](https://github.com/ndl-lab/ndlocr_cli)（CC BY 4.0）／ 正解データ・書名辞書：[識別タグ付き古事類苑データ](https://github.com/yamadashoji18/kojiruien)（CC0）／ 画像：国際日本文化研究センター（実行時に取得し、本リポジトリには含みません）
