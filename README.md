@@ -21,7 +21,7 @@ https://www.runpod.io でアカウントを作り、**Billing** でクレジッ�
 
 ## 2. Pod を起動する
 
-1. **Pods → Deploy** で GPU を選ぶ：**RTX 4090 または 3090**（50 シリーズは不可）
+1. **Pods → Deploy** で GPU を選ぶ：**RTX 4090 または 3090**（50 シリーズは不可）。GPU を 2 枚にすると約 2 倍速
 2. **Change Template** で 1 のテンプレートを選び、**Deploy On-Demand**
 3. 1〜2 分後、**Connect → JupyterLab** を開き、パスワードを入力
 
