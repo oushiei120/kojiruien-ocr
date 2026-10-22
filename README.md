@@ -4,6 +4,7 @@
 
 - 目安：1 冊 約 1 時間、約 1 ドル（RTX 4090）
 - 対照ビューア：https://oushiei120.github.io/kojiruien-ocr-viewer/
+- 作業の説明（訓練の方法・精度・今後の課題）：[docs/古事類苑作業ノート（081022）.docx](docs/古事類苑作業ノート（081022）.docx)
 
 ---
 
