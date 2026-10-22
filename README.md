@@ -56,6 +56,13 @@ VOLUMES = ['bung_2', 'bung_3']
 
 ---
 
+## 作成済みの結果
+
+[`results/bungakubu_v5b/`](results/bungakubu_v5b/)：文学部一〜三（v5b、人手による校正なし）
+
+- `BUNGAKUBU-1.txt`〜`3.txt`：識別タグ付きテキスト（UTF-16、既存の shikibetsu_raw と同じ形式）
+- `xml/`：OCR の結果（行ごとの座標・種別）
+
 ## 冊名の一覧
 
 | 部 | 冊名 | 部 | 冊名 | 部 | 冊名 |
