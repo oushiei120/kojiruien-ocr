@@ -89,4 +89,4 @@ VOLUMES = ['bung_2', 'bung_3']
 
 ---
 
-v5b モデル：[Releases](https://github.com/oushiei120/kojiruien-ocr/releases/tag/v5b)（ノートブックが自動でダウンロードします）／ OCR エンジン：国立国会図書館 [NDLOCR](https://github.com/ndl-lab/ndlocr_cli)（CC BY 4.0）／ 正解データ・書名辞書：[識別タグ付き古事類苑データ](https://github.com/yamadashoji18/kojiruien)（CC0）／ 画像：国際日本文化研究センター（実行時に取得し、本リポジトリには含みません）
+v5b モデル：Google Drive（予備：[Releases](https://github.com/oushiei120/kojiruien-ocr/releases/tag/v5b)）。ノートブックが自動でダウンロードします ／ OCR エンジン：国立国会図書館 [NDLOCR](https://github.com/ndl-lab/ndlocr_cli)（CC BY 4.0）／ 正解データ・書名辞書：[識別タグ付き古事類苑データ](https://github.com/yamadashoji18/kojiruien)（CC0）／ 画像：国際日本文化研究センター（実行時に取得し、本リポジトリには含みません）
