@@ -374,9 +374,17 @@ class Converter:
         self.add('<wari>' + t + '</wari>')
 
 
+def drop_margin_strips(pages):
+    """NDLOCR 偶尔把一页切成 _L/_R：_L 只是左边几百像素的细条（柱＋页码），去掉它。"""
+    widest = {}
+    for p in pages:
+        widest[p.index] = max(widest.get(p.index, 0), p.width)
+    return [p for p in pages if p.width >= 0.3 * widest[p.index]]
+
+
 def convert(xml_path, page_offset=0, lexicon=None):
     conv = Converter(Lexicon(lexicon) if lexicon else None)
-    for page in ndlxml.read(xml_path):
+    for page in drop_margin_strips(ndlxml.read(xml_path)):
         columns, geo = page_layout(page)
         conv.page(page.index + page_offset, columns, geo)
     if conv.state in ('name', 'hen'):
